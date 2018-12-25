@@ -2,9 +2,9 @@
 参考深入理解《深入理解Java虚拟机 JVM高级特性与最佳实践》第三部分第6章
 1. 先写个简单的Hello world class文件
 ````java
-	public class Hello{
+public class HelloWorld{
 	public static void main(String[] args){
-		System.out.println("Hello World");
+		System.out.println("Hello world");
 	}
 }
 ````
@@ -15,7 +15,7 @@ javac -g Hello.java   #g参数表示生成调试信息
 之后得到对应的class文件Hello.class
 先用javap 看下文件结构，javap 讲class文件生成java字节码
 ````shell
-javap -v Hello
+javap -v HelloWorld
 ````
 将会输出一堆信息,主要分为几部分
  文件基本信息，常量池字符，方法执行字节码，源文件
@@ -143,25 +143,7 @@ hexdump -C HelloWorld.class
 上面二进制大致分为几类：
 文件魔数，主版本号，次版本号，常量池，类名，父类名，接口定义，类字段，方法定义，其他属性(如源文件等)
 每类大致占用以下长度，u1表示1个字节，u2表示两个字节，u4表示4个字节
-<table>
-<tr><td>类型</td><td>名称</td><td>数量</td></tr>
-<tr><td>u4</td><td>magic</td><td>1</td></tr>
-<tr><td>u2</td><td>minor_version</td><td>1</td></tr>
-<tr><td>u2</td><td>major_version</td><td>1</td></tr>
-<tr><td>u2</td><td>constant_pool_count</td><td>1</td></tr>
-<tr><td>cp_info</td><td>constant_pool</td><td>constant_pool_count-1</td></tr>
-<tr><td>u2</td><td>access_flag</td><td>1</td></tr>
-<tr><td>u2</td><td>this_class</td><td>1</td></tr>
-<tr><td>u2</td><td>super_class</td><td>1</td></tr>
-<tr><td>u2</td><td>interface_count</td><td>1</td></tr>
-<tr><td>interface_info</td><td>interfaces</td><td>interface_count</td></tr>
-<tr><td>u2</td><td>field_count</td><td>1</td></tr>
-<tr><td>field_info</td><td>fields</td><td>field_count</td></tr>
-<tr><td>u2</td><td>method_count</td><td>1</td></tr>
-<tr><td>method_info</td><td>methods</td><td>method_count</td></tr>
-<tr><td>u2</td><td>attribute_count</td><td>1</td></tr>
-<tr><td>attribute_info</td><td>attributes</td><td>attribute_count</td></tr>
-</table>
+<table><tr><td>类型</td><td>名称</td><td>数量</td></tr><tr><td>u4</td><td>magic</td><td>1</td></tr><tr><td>u2</td><td>minor_version</td><td>1</td></tr><tr><td>u2</td><td>major_version</td><td>1</td></tr><tr><td>u2</td><td>constant_pool_count</td><td>1</td></tr><tr><td>cp_info</td><td>constant_pool</td><td>constant_pool_count-1</td></tr><tr><td>u2</td><td>access_flag</td><td>1</td></tr><tr><td>u2</td><td>this_class</td><td>1</td></tr><tr><td>u2</td><td>super_class</td><td>1</td></tr><tr><td>u2</td><td>interface_count</td><td>1</td></tr><tr><td>interface_info</td><td>interfaces</td><td>interface_count</td></tr><tr><td>u2</td><td>field_count</td><td>1</td></tr><tr><td>field_info</td><td>fields</td><td>field_count</td></tr><tr><td>u2</td><td>method_count</td><td>1</td></tr><tr><td>method_info</td><td>methods</td><td>method_count</td></tr><tr><td>u2</td><td>attribute_count</td><td>1</td></tr><tr><td>attribute_info</td><td>attributes</td><td>attribute_count</td></tr></table>
 
 ###解析二进制流
 ####基本信息
@@ -178,84 +160,78 @@ struct cp_info{
 }
 ````
 常量tag说明
-<table>
-<tr><td>常量类型</td><td>值</td><td>描述</td></tr>
-<tr><td>CONSTANT\_UTF8</td><td>1 </td><td>u2字符串长度，接下N字节字符串长度</td></tr>
-<tr><td>CONSTANT\_Integer</td><td>3 </td><td>4字节带符号位整数</td></tr>
-<tr><td>CONSTANT\_Float</td><td>4 </td><td>4字节浮点数</td></tr>
-<tr><td>CONSTANT\_Long</td><td>5 </td><td>8字节带符号位整数</td></tr>
-<tr><td>CONSTANT\_Double</td><td>6 </td><td>8字节浮点数</td></tr>
-<tr><td>CONSTANT\_Class</td><td>7 </td><td>u2指向UTF8常量,tag=1</td></tr>
-<tr><td>CONSTANT\_String</td><td>8 </td><td>u2指向UTF8常量,tag=1</td></tr>
-<tr><td>CONSTANT\_Fieldref</td><td>9 </td><td>u2 Class index,,tag=7<br> u2 NameAndType index,tag=12</td></tr>
-<tr><td>CONSTANT\_Methodref</td><td>10</td><td>u2 Class index,tag=7<br> u2 NameAndType index,tag=12</td></tr>
-<tr><td>CONSTANT\_Interfaceref</td><td>11</td><td>u2 Class index,tag=7<br> u2 NameAndType index,tag=12</td></tr>
-<tr><td>CONSTANT\_NameAndType</td><td>12</td><td>u2 指向UTF8常量(名字)<br> u2 UTF8常量(类型) </td></tr>
-<tr><td>CONSTANT\_MethodHandle/td><td>15</td><<td>待补充</td></tr>
-<tr><td>CONSTANT\_MethodType</td><td>16</td><td>待补充</td></tr>
-<tr><td>CONSTANT\_InvokeDynamic</td><td>18</td><td>待补充</td></tr>
-</table>
+<table><tr><td>常量类型</td><td>值</td><td>描述</td></tr><tr><td>JVM_CONSTANT_Class</td><td>7</td><td>u2指向UTF8常量,tag=1</td></tr><tr><td>JVM_CONSTANT_Fieldref</td><td>9</td><td>u2 Class index,,tag=7</br>u2 NameAndType index,tag=12</td></tr><tr><td>JVM_CONSTANT_Methodref</td><td>10</td><td>u2 Class index,tag=7</br>u2 NameAndType index,tag=12</td></tr><tr><td>JVM_CONSTANT_InterfaceMethodref</td><td>11</td><td>u2 Class index,tag=7</br>u2 NameAndType index,tag=12</td></tr><tr><td>JVM_CONSTANT_String</td><td>8</td><td>u2指向UTF8常量,tag=1</td></tr><tr><td>JVM_CONSTANT_MethodType</td><td>16</td><td>u2 signature_index指向UTF8常量,tag=1</td></tr><tr><td>JVM_CONSTANT_MethodHandle</td><td>15</td><td>u1 ref_kind(0~9)</br> u2 Methodref tag=10</td></tr><tr><td>JVM_CONSTANT_InvokeDynamic</td><td>18</td><td>u2 bootstrap_specifier_index</br>u2 NameAndType index,tag=12</td></tr><tr><td>JVM_CONSTANT_Integer</td><td>3</td><td>4字节带符号位整数</td></tr><tr><td>JVM_CONSTANT_Float</td><td>4</td><td>4字节浮点数</td></tr><tr><td>JVM_CONSTANT_Long</td><td>5</td><td>8字节带符号位整数</td></tr><tr><td>JVM_CONSTANT_Double</td><td>6</td><td>8字节浮点数</td></tr><tr><td>JVM_CONSTANT_NameAndType</td><td>12</td><td>u2 指向UTF8常量(名字)</br>u2 UTF8常量(类型)</td></tr><tr><td>JVM_CONSTANT_Utf8</td><td>1</td><td>u2字符串长度N，接下N字节字符串长度</td></tr></table>
 
 #####常量tag定义
 ````
-#CONSTANT_UTF8
-struct CONSTANT_UTF8{
-	u1 tag = 1; #tag标识
-	u2 length;  #字符串字节长度
-	u1 byte[length]; #字符串字节内容
-}
-#CONSTANT_Integer
-struct CONSTANT_Integer{
-	u1 tag = 3; #tag标识
-	u4 int_value;  #整数值
-}
-#CONSTANT_Float
-struct CONSTANT_Float{
-	u1 tag = 4; #tag标识
-	u4 float_value;  #值
-}
-#CONSTANT_Long
-struct CONSTANT_Long{
-	u1 tag = 5; #tag标识
-	u8 long_value;  #值
-}
-#CONSTANT_Double
-struct CONSTANT_Double{
-	u1 tag = 6; #tag标识
-	u8 double_value;  #值
-}
-#CONSTANT_Class
-struct CONSTANT_Class{
+JVM_CONSTANT_Class{
 	u1 tag = 7; #tag标识
 	u2 name_index;  #UTF8常量索引
 }
-#CONSTANT_String
-struct CONSTANT_String{
-	u1 tag = 8; #tag标识
-	u2 name_index;  #UTF8常量索引
-}
-#CONSTANT_Fieldref
-struct CONSTANT_Fieldref{
+JVM_CONSTANT_Fieldref{
 	u1 tag = 9; #tag标识
 	u2 class_index;  #class索引
 	u2 name_and_type_index;  #name_and_type索引
 }
-#CONSTANT_Methodref
-struct CONSTANT_Methodref{
+JVM_CONSTANT_Methodref{
 	u1 tag = 10; #tag标识
 	u2 class_index;  #class索引
 	u2 name_and_type_index;  #name_and_type索引
 }
-#CONSTANT_Interfaceref
-struct CONSTANT_Interfaceref{
+JVM_CONSTANT_InterfaceMethodref{
 	u1 tag = 11; #tag标识
 	u2 class_index;  #class索引
 	u2 name_and_type_index;  #name_and_type索引
 }
-#CONSTANT_NameAndType
-struct CONSTANT_NameAndType{
+JVM_CONSTANT_String{
+	u1 tag = 8; #tag标识
+	u2 name_index;  #UTF8常量索引
+}
+JVM_CONSTANT_MethodType{
+	u1 tag = 16; #tag标识
+	u2 name_index;  #UTF8常量索引
+}
+JVM_CONSTANT_MethodHandle{
+	u1 tag = 15; #tag标识
+	u1 reference_kind; #必须在[1..9]  
+	u2 reference_index;  # case reference_kind when [1..4] then CONSTANT_Fieldref_info when [5..8] then CONSTANT_Methodref_info when 9 then CONSTANT_InterfaceMethodref_info
+}
+JVM_CONSTANT_InvokeDynamic{
+	u1 tag = 11; #tag标识
+	u2 bootstrap_specifier_index;  # bootstrap_specifier_index
+	u2 name_and_type_index;  #name_and_type索引
+}
+JVM_CONSTANT_Integer{
+	u1 tag = 3; #tag标识
+	u4 int_value;  #整数值
+}
+JVM_CONSTANT_Float{
+	u1 tag = 4; #tag标识
+	u4 float_value;  #值
+}
+JVM_CONSTANT_Long{
+	u1 tag = 5; #tag标识
+	u8 long_value;  #值
+}
+JVM_CONSTANT_Double{
+	u1 tag = 6; #tag标识
+	u8 double_value;  #值
+}
+JVM_CONSTANT_NameAndType{
 	u1 tag = 12; #tag标识
 	u2 name_index;  #UTF8常量索引
 	u2 type_index;  #UTF8常量索引
 }
+JVM_CONSTANT_UTF8{
+	u1 tag = 1; #tag标识
+	u2 length;  #字符串字节长度
+	u1 byte[length]; #字符串字节内容
+}
 ````
+
+注：
+1.参考openjdk源代码
+hotspot/src/share/vm/classfile/classFileParser.cpp
+line:93
+ClassFileParser::parse_constant_pool_entries
+2.参考http://cr.openjdk.java.net/~vlivanov/talks/2015-Indy_Deep_Dive.pdf 
