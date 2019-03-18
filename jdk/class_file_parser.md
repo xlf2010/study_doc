@@ -18,34 +18,34 @@ cp_info{
 
 ####常量tag定义
 ````
-JVM_CONSTANT_Class{
+CONSTANT_Class_info {
 	u1 tag = 7; #tag标识
 	u2 name_index;  #UTF8常量索引
 }
-JVM_CONSTANT_Fieldref{
+CONSTANT_Fieldref_info {
 	u1 tag = 9; #tag标识
 	u2 class_index;  #class索引
 	u2 name_and_type_index;  #name_and_type索引
 }
-JVM_CONSTANT_Methodref{
+CONSTANT_Methodref_info {
 	u1 tag = 10; #tag标识
 	u2 class_index;  #class索引
 	u2 name_and_type_index;  #name_and_type索引
 }
-JVM_CONSTANT_InterfaceMethodref{
+CONSTANT_InterfaceMethodref_info {
 	u1 tag = 11; #tag标识
 	u2 class_index;  #class索引
 	u2 name_and_type_index;  #name_and_type索引
 }
-JVM_CONSTANT_String{
+CONSTANT_String_info {
 	u1 tag = 8; #tag标识
 	u2 name_index;  #UTF8常量索引
 }
-JVM_CONSTANT_MethodType{
+CONSTANT_MethodType_info{
 	u1 tag = 16; #tag标识
 	u2 name_index;  #UTF8常量索引
 }
-JVM_CONSTANT_MethodHandle{
+CONSTANT_MethodHandle_info{
 	u1 tag = 15; #tag标识
 	u1 reference_kind; #必须在[1..9],1..9定义如下备注 
 	u2 reference_index;  # case reference_kind when [1..4] then CONSTANT_Fieldref_info when [5..8] then CONSTANT_Methodref_info when 9 then CONSTANT_InterfaceMethodref_info
@@ -62,35 +62,35 @@ JVM_CONSTANT_MethodHandle{
 * #8	REF_newInvokeSpecial
 * #9	REF_invokeInterface
 */
-JVM_CONSTANT_InvokeDynamic{
+CONSTANT_InvokeDynamic_info{
 	u1 tag = 11; #tag标识
 	u2 bootstrap_specifier_index;  # bootstrap_specifier_index
 	u2 name_and_type_index;  #name_and_type索引
 }
-JVM_CONSTANT_Integer{
+CONSTANT_Integer_info {
 	u1 tag = 3; #tag标识
 	u4 int_value;  #整数值
 }
-JVM_CONSTANT_Float{
+CONSTANT_Float_info {
 	u1 tag = 4; #tag标识
 	u4 float_value;  #值
 }
-JVM_CONSTANT_Long{
+CONSTANT_Long_info{
 	u1 tag = 5; #tag标识
 	u4 high_bytes; 
 	u4 low_bytes;
 }
-JVM_CONSTANT_Double{
+CONSTANT_Double_info{
 	u1 tag = 6; #tag标识
 	u4 high_bytes;
 	u4 low_bytes;
 }
-JVM_CONSTANT_NameAndType{
+CONSTANT_NameAndType_info{
 	u1 tag = 12; #tag标识
 	u2 name_index;  #UTF8常量索引
 	u2 type_index;  #UTF8常量索引
 }
-JVM_CONSTANT_UTF8{
+CONSTANT_Utf8_info{
 	u1 tag = 1; #tag标识
 	u2 length;  #字符串字节长度
 	u1 byte[length]; #字符串字节内容
@@ -284,8 +284,8 @@ public class TestException{
              0     2    11   Class java/lang/Exception		   //在[0,2)指令，也就是执行iconst_1,istore_1时出现Exception则跳转到指令11(astore_1)开始执行
 
 ````
-####StackMapTable
-StackMapTable是位于Code属性的一个属性值，结构如下：
+####3.StackMapTable
+StackMapTable是位于Code属性的一个属性值，在虚拟机类加载的类型阶段被使用。结构如下：
 ````
 StackMapTable_attribute {
     u2              attribute_name_index;	#常量池UTF8索引，名字为StackMapTable
@@ -399,4 +399,277 @@ Uninitialized_variable_info {
 }
 ````
 
+####4.Exceptions
+抛出异常至少是以下条件中的一个
+要抛出的是RuntimeException或其子类的实例。
+要抛出的是Error或其子类的实例。
+要抛出的是在exception_index_table[]数组中申明的异常类或其子类的实例。
+Exception结构如下：
+````
+Exceptions_attribute {
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为Exceptions
+	u4 attribute_length;		#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	u2 number_of_exceptions;	#异常个数
+	u2 exception_index_table[number_of_exceptions];	#指向CONSTANT_Class_info类型索引
+}
+````
 
+####5.InnerClasses
+````
+InnerClasses_attribute {  
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为InnerClasses
+	u4 attribute_length;		#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	u2 number_of_classes;		#class成员个数
+	{ 
+		u2 inner_class_info_index;	#内部类索引，指向CONSTANT_Class_info
+		u2 outer_class_info_index;	#宿主类索引，指向CONSTANT_Class_info，顶层类(与class并列)，局部类(方法内部)，匿名类则为0
+		u2 inner_name_index;		#类名，指向CONSTANT_Utf8_info常量，匿名类为0
+		u2 inner_class_access_flags;	#访问标志
+	} classes[number_of_classes];
+}
+````
+修饰符
+<table><tr><td>Flag Name </td><td>Value </td><td>Interpretation</td><td>描述</td></tr><tr><td>ACC_PUBLIC </td><td>0x0001 </td><td>Marked or implicitly public in source.</td><td>public修饰</td></tr><tr><td>ACC_PRIVATE </td><td>0x0002 </td><td>Marked private in source.</td><td>private修饰</td></tr><tr><td>ACC_PROTECTED </td><td>0x0004 </td><td>Marked protected in source.</td><td>protected修饰</td></tr><tr><td>ACC_STATIC </td><td>0x0008 </td><td>Marked or implicitly static in source.</td><td>static修饰</td></tr><tr><td>ACC_FINAL </td><td>0x0010 </td><td>Marked final in source.</td><td>final修饰</td></tr><tr><td>ACC_INTERFACE</td><td>0x0200 </td><td>Was an interface in source.</td><td>接口</td></tr><tr><td>ACC_ABSTRACT</td><td>0x0400 </td><td>Marked or implicitly abstract in source.</td><td>抽象类</td></tr><tr><td>ACC_SYNTHETIC </td><td>0x1000 </td><td>Declared synthetic; not present in the source code.</td><td>非源码生成</td></tr><tr><td>ACC_ANNOTATION </td><td>0x2000 </td><td>Declared as an annotation type.</td><td>注解</td></tr><tr><td>ACC_ENUM </td><td>0x4000 </td><td>Declared as an enum type.</td><td>枚举</td></tr></table>
+
+####6.EnclosingMethod
+当且仅当Class为局部类或匿名类时才有EnclosingMethod属性
+````
+EnclosingMethod_attribute {
+      u2 attribute_name_index;	#CONSTANT_Utf8_info,值为EnclosingMethod
+      u4 attribute_length;		#固定值为4
+      u2 class_index			#指向CONSTANT_Class_info
+      u2 method_index;			#CONSTANT_NameAndType_info，如果不是方法内部则为0
+}
+````
+
+####7.Synthetic
+位于ClassFile,field_info, 或者 method_info 表示不在源码出现，例外情况：由编译器产生的实例化方法，类初始方法，Enum.values()，Enum.valueOf()等不需要Synthetic标志
+````
+Synthetic_attribute {
+      u2 attribute_name_index;	#CONSTANT_Utf8_info,值为Synthetic
+      u4 attribute_length;		#固定值0
+}
+````
+
+####8.Signature
+泛型签名信息，位于ClassFile,field_info, 或者 method_info，如果一个类，接口，构造方法，字段包含泛型变量，则保存泛型信息，结构如下：
+````
+Signature_attribute {
+	 u2 attribute_name_index;	#CONSTANT_Utf8_info,值为Signature
+	 u4 attribute_length;	#固定值2
+	 u2 signature_index;	#CONSTANT_Utf8_info
+}
+
+````
+
+####9.SourceFile
+可选定长字段，位于ClassFile，记录源文件名，结构如下：
+````
+SourceFile_attribute {
+	 u2 attribute_name_index;	#CONSTANT_Utf8_info,值为SourceFile
+	 u4 attribute_length;		#固定值2
+	 u2 sourcefile_index;		#CONSTANT_Utf8_info
+}
+````
+
+####10.SourceDebugExtension 
+可选属性,保存扩展调试信息
+````
+SourceDebugExtension_attribute {
+	 u2 attribute_name_index;	#CONSTANT_Utf8_info,值为SourceDebugExtension
+	 u4 attribute_length;		#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	 u1 debug_extension[attribute_length];	#用于保存调试信息，指向CONSTANT_Utf8_info
+}
+````
+
+####11.LineNumberTable
+可选变长属性，位于Code属性表，对应code数组在源文件中的位置
+````
+LineNumberTable_attribute {
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为LineNumberTable
+	u4 attribute_length;		#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	u2 line_number_table_length;	#line_number_table个数
+	{ 
+		u2 start_pc;				#code 数组的索引，表示源文件中新的行的起点,需小于code长度
+		u2 line_number;				#源文件行数
+	} line_number_table[line_number_table_length];
+}
+````
+
+####12.LocalVariableTable
+可选变长属性，位于Code属性表中，用于调试保存局部变量信息,每个code属性最多只能有一个LocalVariableTable属性
+````
+LocalVariableTable_attribute {
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为LocalVariableTable
+	u4 attribute_length;		#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	u2 local_variable_table_length;		#局部变量个数
+	{ 
+		u2 start_pc;			#code 数组的索引起始值
+		u2 length;				#局部变量在code范围长度，为 [start_pc+length)
+		u2 name_index;			#局部变量名，CONSTANT_Utf8_info
+		u2 descriptor_index;	#局部变量类型描述符，CONSTANT_Utf8_info
+		u2 index;				#局部变量在栈帧中的索引，如果是long或double则占用index和index+1两个索引
+	} local_variable_table[local_variable_table_length];
+}
+````
+
+####13.LocalVariableTypeTable
+用于给调试器确定方法在执行中局部变量的信息，在Code属性的属性表中，与**LocalVariableTable**不同，这里提供方法签名信息，这仅在泛型参数情况下有效，泛型类型会同时出现在LocalVariableTable，LocalVariableTypeTable中，其他仅存在LocalVariableTable中
+```
+LocalVariableTypeTable_attribute {
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为LocalVariableTable
+	u4 attribute_length;		#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	u2 local_variable_type_table_length;	#局部变量个数
+	{ 
+		u2 start_pc;		#code 数组的索引起始值
+		u2 length;			#局部变量在code范围长度，为 [start_pc+length)
+		u2 name_index;		#局部变量名，CONSTANT_Utf8_info
+		u2 signature_index;	#局部变量类型的字段签名，CONSTANT_Utf8_info
+		u2 index;			#局部变量在栈帧中的索引，如果是long或double则占用index和index+1两个索引
+	} local_variable_type_table[local_variable_type_table_length];
+}
+
+```
+
+####14.Deprecated
+Deprecated属性是可选定长属性,位于ClassFile, field_info, 或 method_info中，表示过期属性，将来会被其他替换
+结构如下：
+````
+Deprecated_attribute {
+	 u2 attribute_name_index;	#CONSTANT_Utf8_info,值为Deprecated
+	 u4 attribute_length;		#固定值0
+}
+````
+
+####15.RuntimeVisibleAnnotations
+变长属性位于ClassFile, field_info, method_info，表示运行时可见注解，用于反射API获取。
+结构如下：
+````
+RuntimeVisibleAnnotations_attribute {
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为RuntimeVisibleAnnotations
+	u4 attribute_length;	#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	u2 num_annotations;		#运行时可见注解的数量
+	annotation annotations[num_annotations];	#表示每个注解
+}
+
+annotation {    
+	u2 type_index;    	#CONSTANT_Utf8_info,表示注解类型
+	u2 num_element_value_pairs;    #key-value个数
+	{   
+		u2 element_name_index;     #key对应的CONSTANT_Utf8_info索引
+		element_value value;    #value
+	} element_value_pairs[num_element_value_pairs];
+}
+
+element_value {
+	u1 tag;
+	union {
+		u2 const_value_index;		#表示基础类型常量，或String字面常量
+		{
+			u2 type_name_index;		#CONSTANT_Utf8_info，表示枚举常量类型
+			u2 const_name_index;	#CONSTANT_Utf8_info,表示枚举常量类型简单名称
+		} enum_const_value;
+		u2 class_info_index;		#CONSTANT_Utf8_info,表示类名称
+		annotation annotation_value;	#annotation类型
+		{
+			u2 num_values;			#数组元素个数
+			element_value values[num_values];	#数组元素值
+		} array_value;				#数组类型
+	} value;
+}
+注：
+class_info_index表示如下：
+1. 如果是类名称，接口或数组，则为类型名称，如Object.class表示为Ljava/lang/Object
+2. 如果是基础类型，则为对应的缩写，如int.class表示为I
+3. 如果是void，则为V
+````
+element_value.tag枚举如下：
+<table><tr><td>tag值</td><td>类型</td><td>union联合体值</td><td>常量类型</td></tr><tr><td>B </td><td>byte </td><td>const_value_index </td><td>CONSTANT_Integer</td></tr><tr><td>C </td><td>char </td><td>const_value_index </td><td>CONSTANT_Integer</td></tr><tr><td>D </td><td>double </td><td>const_value_index </td><td>CONSTANT_Double</td></tr><tr><td>F </td><td>float </td><td>const_value_index </td><td>CONSTANT_Float</td></tr><tr><td>I </td><td>int </td><td>const_value_index </td><td>CONSTANT_Integer</td></tr><tr><td>J </td><td>long </td><td>const_value_index </td><td>CONSTANT_Long</td></tr><tr><td>S </td><td>short </td><td>const_value_index </td><td>CONSTANT_Integer</td></tr><tr><td>Z </td><td>boolean </td><td>const_value_index </td><td>CONSTANT_Integer</td></tr><tr><td>s </td><td>String </td><td>const_value_index </td><td>CONSTANT_Utf8</td></tr><tr><td>e </td><td>Enum type </td><td>enum_const_value </td><td>Not applicable</td></tr><tr><td>c </td><td>Class </td><td>class_info_index </td><td>Not applicable</td></tr><tr><td>@ </td><td>Annotation type </td><td>annotation_value </td><td>Not applicable</td></tr><tr><td>[ </td><td>Array type </td><td>array_value </td><td>Not applicable</td></tr></table>
+
+####16.RuntimeInvisibleAnnotations
+RuntimeInvisibleAnnotations跟RuntimeVisibleAnnotations类似，RuntimeInvisibleAnnotations表示在运行时不可见注解，不能通过反射API获取，除非通过某些特殊方式(如命令行参数)获取，JVM虚拟机会忽略这些参数，结构参考RuntimeVisibleAnnotations
+
+####17.RuntimeVisibleParameterAnnotations
+RuntimeVisibleParameterAnnotations表示在运行时可见参数注解，能通过反射API获取，是method_info的一个属性，method_info最多只有一个RuntimeVisibleParameterAnnotations。
+结构如下:
+````
+RuntimeVisibleParameterAnnotations_attribute {
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为RuntimeVisibleParameterAnnotations
+	u4 attribute_length;	#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	u1 num_parameters;    #方法参数个数
+	{ 
+		u2 num_annotations;		#注解的数量
+		annotation annotations[num_annotations];	#注解值
+	} parameter_annotations[num_parameters];
+}
+````
+
+
+####18. RuntimeInvisibleParameterAnnotations
+RuntimeInvisibleParameterAnnotations跟RuntimeVisibleParameterAnnotations类似，RuntimeInvisibleParameterAnnotations表示方法参数不可见注解，不能通过反射API获取，除非通过某些特殊方式(如命令行参数)获取，JVM虚拟机会忽略这些参数，结构参考RuntimeVisibleParameterAnnotations
+
+####19. RuntimeVisibleTypeAnnotations
+RuntimeVisibleTypeAnnotations是一个变长属性，位于ClassFile, field_info,  method_info，或者code属性中，记录了可见注解在ClassFile, field_info,  method_info中的正确位置，或者方法体表达式的位置，JVM必须能够识别这个注解以便被反射API获取到。
+
+####20. RuntimeInvisibleTypeAnnotations
+
+
+####21. AnnotationDefault
+AnnotationDefault位于某些特定method_info的变长属性，表示注解结构的默认值，如一个注解内定义一个方法： int i() default 1;
+结构如下：
+```
+AnnotationDefault_attribute {    
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为AnnotationDefault
+	u4 attribute_length;	#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	element_value default_value;	#默认值
+}
+```
+
+####22. BootstrapMethods
+变长属性，位于ClassFile结构的属性表中。用于保存invokedynamic指令引用的引导方法限定符。
+如果常量池中至少有一个CONSTANT_InvokeDynamic_info，则ClassFile中有且只能有一个BootstrapMethods属性。
+结构如下：
+**疑问点：为何必须为6或8？**
+````
+BootstrapMethods_attribute {
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为BootstrapMethods
+	u4 attribute_length;		#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	u2 num_bootstrap_methods;	#bootstrap_methods个数
+	{ 
+		u2 bootstrap_method_ref;	#CONSTANT_MethodHandle_info
+		u2 num_bootstrap_arguments;	#参数个数
+		u2 bootstrap_arguments[num_bootstrap_arguments];	#指向常量池索引
+	} bootstrap_methods[num_bootstrap_methods];
+}
+注：
+1. bootstrap_method_ref指向的CONSTANT_MethodHandle_info.reference_kind为6(REF_invokeStatic)或者8(REF_newInvokeSpecial)，否则可能导致不能执行方法。
+2. bootstrap_arguments常量池类型为以下其中一种：
+	CONSTANT_String_info
+	CONSTANT_Class_info
+	CONSTANT_Integer_info
+	CONSTANT_Long_info
+	CONSTANT_Float_info
+	CONSTANT_Double_info
+	CONSTANT_MethodHandle_info
+	CONSTANT_MethodType_info
+````
+
+####23. MethodParameters
+MethodParameters是位于method_info 的一个变长属性，用于记录方法参数信息，如名字，访问权限等。
+结构如下：
+```
+MethodParameters_attribute {
+	u2 attribute_name_index;	#CONSTANT_Utf8_info,值为MethodParameters
+	u4 attribute_length;		#属性长度，不包括attribute_name_index+attribute_length 6字节长度
+	u1 parameters_count;	#方法参数个数
+	{ 
+		u2 name_index;	方法名称索引：为0表示没名字，大于0表示常量池索引
+		u2 access_flags;
+	} parameters[parameters_count];
+}
+注：access_flags
+0x0010 (ACC_FINAL)	final修饰
+0x1000 (ACC_SYNTHETIC)	非源码编译，不出现在源码文件中
+0x8000 (ACC_MANDATED)	源码编译，出现在源码文件中
+
+```
